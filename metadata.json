@@ -1,0 +1,7 @@
+{
+  "name": "Siabdul v2",
+  "description": "A modern student attendance system using QR codes and Gemini AI for smart reporting.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

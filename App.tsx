@@ -1746,6 +1746,108 @@ function App() {
                     </div>
                 </div>
 
+                {/* Database Settings */}
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-6">
+                     <h3 className="font-bold text-gray-800 flex items-center gap-2 border-b border-gray-100 pb-2">
+                        <Server className="w-5 h-5 text-purple-600" /> Pengaturan Database
+                    </h3>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="p-4 bg-purple-50 rounded-xl border border-purple-100">
+                            <h4 className="font-bold text-purple-900 mb-2">Backup & Restore</h4>
+                            <p className="text-xs text-purple-700 mb-4">
+                                Unduh cadangan data siswa dan absensi, atau pulihkan dari file cadangan sebelumnya.
+                            </p>
+                            <div className="flex flex-col gap-2">
+                                <button 
+                                    onClick={() => {
+                                        const data = {
+                                            students,
+                                            attendance,
+                                            classes,
+                                            schoolName,
+                                            waConfig
+                                        };
+                                        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                                        const url = URL.createObjectURL(blob);
+                                        const a = document.createElement('a');
+                                        a.href = url;
+                                        a.download = `siabdul_backup_${new Date().toISOString().split('T')[0]}.json`;
+                                        a.click();
+                                        URL.revokeObjectURL(url);
+                                    }}
+                                    className="w-full py-2 bg-white text-purple-700 border border-purple-200 rounded-lg text-sm font-bold hover:bg-purple-100 transition-colors flex items-center justify-center gap-2"
+                                >
+                                    <Download className="w-4 h-4" /> Download Backup
+                                </button>
+                                <label className="w-full py-2 bg-purple-600 text-white rounded-lg text-sm font-bold hover:bg-purple-700 transition-colors flex items-center justify-center gap-2 cursor-pointer">
+                                    <Upload className="w-4 h-4" /> Restore Data
+                                    <input 
+                                        type="file" 
+                                        accept=".json"
+                                        className="hidden"
+                                        onChange={(e) => {
+                                            const file = e.target.files?.[0];
+                                            if (file) {
+                                                const reader = new FileReader();
+                                                reader.onload = (evt) => {
+                                                    try {
+                                                        const data = JSON.parse(evt.target?.result as string);
+                                                        if (confirm("Apakah Anda yakin ingin memulihkan data? Data saat ini akan ditimpa.")) {
+                                                            if (data.students) setStudents(data.students);
+                                                            if (data.attendance) setAttendance(data.attendance.map((a: any) => ({...a, timestamp: new Date(a.timestamp)})));
+                                                            if (data.classes) setClasses(data.classes);
+                                                            if (data.schoolName) setSchoolName(data.schoolName);
+                                                            if (data.waConfig) setWaConfig(data.waConfig);
+                                                            alert("Data berhasil dipulihkan!");
+                                                        }
+                                                    } catch (err) {
+                                                        alert("File backup tidak valid.");
+                                                    }
+                                                };
+                                                reader.readAsText(file);
+                                            }
+                                        }}
+                                    />
+                                </label>
+                            </div>
+                        </div>
+
+                        <div className="p-4 bg-red-50 rounded-xl border border-red-100">
+                            <h4 className="font-bold text-red-900 mb-2">Zona Bahaya</h4>
+                            <p className="text-xs text-red-700 mb-4">
+                                Hapus semua data siswa atau reset seluruh aplikasi ke pengaturan awal.
+                            </p>
+                            <div className="flex flex-col gap-2">
+                                <button 
+                                    onClick={() => {
+                                        if (confirm("Yakin ingin menghapus SEMUA data absensi? Data siswa tidak akan hilang.")) {
+                                            setAttendance([]);
+                                            alert("Data absensi telah dikosongkan.");
+                                        }
+                                    }}
+                                    className="w-full py-2 bg-white text-red-600 border border-red-200 rounded-lg text-sm font-bold hover:bg-red-50 transition-colors flex items-center justify-center gap-2"
+                                >
+                                    <Trash2 className="w-4 h-4" /> Reset Absensi
+                                </button>
+                                <button 
+                                    onClick={() => {
+                                        if (confirm("PERINGATAN: Ini akan menghapus SEMUA data siswa, kelas, dan absensi. Aplikasi akan kembali kosong. Lanjutkan?")) {
+                                            setStudents([]);
+                                            setAttendance([]);
+                                            setClasses([]);
+                                            alert("Aplikasi telah di-reset sepenuhnya.");
+                                        }
+                                    }}
+                                    className="w-full py-2 bg-red-600 text-white rounded-lg text-sm font-bold hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
+                                >
+                                    <AlertTriangle className="w-4 h-4" /> Reset Total
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 {/* WhatsApp Gateway Settings */}
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-6">
                      <h3 className="font-bold text-gray-800 flex items-center gap-2 border-b border-gray-100 pb-2">

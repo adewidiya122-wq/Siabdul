@@ -91,7 +91,7 @@ function App() {
   const [students, setStudents] = useState<Student[]>(MOCK_STUDENTS);
   
   // School Settings State
-  const [schoolName, setSchoolName] = useState("MTsS RRIYADLUL ULUM");
+  const [schoolName, setSchoolName] = useState("MTs Riyadlul Ulum");
   const [schoolLogo, setSchoolLogo] = useState<string | null>(null);
   
   // WhatsApp Settings State

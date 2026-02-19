@@ -199,8 +199,9 @@ function App() {
     const message = `Assalamualaikum Bapak/Ibu Wali Murid.\n\nDiinformasikan bahwa siswa:\nNama: *${student.name}*\nKelas: ${student.grade}\n\nTelah *HADIR* di sekolah pada pukul ${timeStr} WIB.\n\nTerima kasih.\n_Sistem Absensi SIABDUL_`;
 
     if (waConfig.mode === 'link') {
-        // Classic WA Link - Cannot be auto sent reliably due to popup blockers
-        window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
+        const encodedMessage = encodeURIComponent(message);
+        // Use direct system link (whatsapp://) to open installed app without browser tabs
+        window.location.href = `whatsapp://send?phone=${phone}&text=${encodedMessage}`;
     } else {
         // --- GATEWAY MODE LOGIC ---
         setIsSendingWA(true);

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Upload, Save, X, User, Camera, Phone, Hash } from 'lucide-react';
 import { Student } from '../types';
+import { compressImage } from '../utils/imageCompression';
 
 interface StudentFormProps {
   initialData?: Student | null;
@@ -30,15 +31,16 @@ const StudentForm: React.FC<StudentFormProps> = ({
     }
   }, [preSelectedClass, initialData]);
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64String = reader.result as string;
-        setAvatar(base64String);
-      };
-      reader.readAsDataURL(file);
+      try {
+        const compressedBase64 = await compressImage(file, 300, 0.7);
+        setAvatar(compressedBase64);
+      } catch (error) {
+        console.error("Error compressing image:", error);
+        alert("Gagal memproses gambar. Silakan coba lagi.");
+      }
     }
   };
 

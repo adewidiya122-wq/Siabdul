@@ -1388,6 +1388,9 @@ function App() {
   };
   
   const renderReport = () => {
+    const [year, month] = exportMonth.split('-').map(Number);
+    const daysInMonth = new Date(year, month, 0).getDate();
+
     return (
       <div className="space-y-6 animate-fadeIn pb-24 md:pb-0">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -1395,6 +1398,26 @@ function App() {
             <h2 className="text-2xl font-bold text-gray-800">Laporan & Rekap</h2>
             <p className="text-gray-500 text-sm">Unduh rekap absensi atau buat laporan otomatis dengan AI.</p>
           </div>
+        </div>
+
+        {/* Class Selector */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+            <h3 className="font-bold text-gray-800 mb-4">Pilih Kelas</h3>
+            <div className="flex overflow-x-auto pb-2 gap-2 custom-scrollbar">
+                {classes.map(cls => (
+                    <button
+                        key={cls}
+                        onClick={() => setSelectedClass(cls)}
+                        className={`px-4 py-2 rounded-xl whitespace-nowrap font-medium transition-all ${
+                            selectedClass === cls 
+                            ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200' 
+                            : 'bg-white text-gray-600 border border-gray-100 hover:bg-gray-50'
+                        }`}
+                    >
+                        {cls}
+                    </button>
+                ))}
+            </div>
         </div>
 
         {/* Report Controls */}
@@ -1480,6 +1503,118 @@ function App() {
                     </div>
                 </div>
              </div>
+        </div>
+
+        {/* Report Preview */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mt-6">
+            <div className="flex items-center justify-between mb-4">
+                <h3 className="font-bold text-gray-800">Preview Laporan</h3>
+                <div className="flex gap-2 bg-gray-50 p-1 rounded-lg">
+                     <button 
+                        onClick={() => setReportViewType('daily')}
+                        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${reportViewType === 'daily' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500'}`}
+                    >
+                        Harian
+                    </button>
+                    <button 
+                        onClick={() => setReportViewType('monthly')}
+                        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${reportViewType === 'monthly' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500'}`}
+                    >
+                        Bulanan
+                    </button>
+                </div>
+            </div>
+            
+            {selectedClass ? (
+                <div className="overflow-x-auto">
+                    {reportViewType === 'daily' ? (
+                        // Render Daily Table
+                        <table className="w-full text-sm text-left">
+                            <thead className="bg-gray-50 text-gray-600 font-medium border-b border-gray-100">
+                                <tr>
+                                    <th className="py-3 px-4">No</th>
+                                    <th className="py-3 px-4">NISN</th>
+                                    <th className="py-3 px-4">Nama</th>
+                                    <th className="py-3 px-4">Waktu Masuk</th>
+                                    <th className="py-3 px-4">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-50">
+                                {getDailyDataForClass(selectedClass, exportDate).map((row: any, idx) => (
+                                    <tr key={idx} className="hover:bg-gray-50">
+                                        <td className="py-3 px-4">{row.No}</td>
+                                        <td className="py-3 px-4 font-mono text-xs">{row.NISN}</td>
+                                        <td className="py-3 px-4 font-medium text-gray-800">{row.Name}</td>
+                                        <td className="py-3 px-4">{row['Time In']}</td>
+                                        <td className="py-3 px-4">
+                                            <span className={`px-2 py-1 rounded text-xs font-medium ${
+                                                row.Status === 'Hadir' ? 'bg-green-50 text-green-700' :
+                                                row.Status === 'Sakit' ? 'bg-yellow-50 text-yellow-700' :
+                                                row.Status === 'Izin' ? 'bg-blue-50 text-blue-700' :
+                                                row.Status === 'Alpa' ? 'bg-red-50 text-red-700' :
+                                                'bg-gray-50 text-gray-500'
+                                            }`}>
+                                                {row.Status}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                ))}
+                                 {getDailyDataForClass(selectedClass, exportDate).length === 0 && (
+                                    <tr>
+                                        <td colSpan={5} className="py-8 text-center text-gray-400">Tidak ada data untuk tanggal ini.</td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    ) : (
+                        // Render Monthly Table
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-xs text-left border-collapse">
+                                <thead>
+                                     <tr className="bg-gray-50 text-gray-600 border-b border-gray-200">
+                                        <th className="p-2 border-r border-gray-100 min-w-[40px]">No</th>
+                                        <th className="p-2 border-r border-gray-100 min-w-[150px]">Nama</th>
+                                        {Array.from({length: daysInMonth}, (_, i) => i + 1).map(d => (
+                                            <th key={d} className="p-1 text-center border-r border-gray-100 min-w-[24px]">{d}</th>
+                                        ))}
+                                        <th className="p-1 text-center bg-green-50 text-green-700 border-r border-gray-100">H</th>
+                                        <th className="p-1 text-center bg-yellow-50 text-yellow-700 border-r border-gray-100">S</th>
+                                        <th className="p-1 text-center bg-blue-50 text-blue-700 border-r border-gray-100">I</th>
+                                        <th className="p-1 text-center bg-red-50 text-red-700">A</th>
+                                     </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-100">
+                                     {getMonthlyDataForClass(selectedClass, exportMonth).data.map((row: any, idx) => (
+                                        <tr key={idx} className="hover:bg-gray-50">
+                                            <td className="p-2 border-r border-gray-100">{row.No}</td>
+                                            <td className="p-2 border-r border-gray-100 font-medium truncate max-w-[150px]" title={row.Name}>{row.Name}</td>
+                                            {Array.from({length: daysInMonth}, (_, i) => i + 1).map(d => (
+                                                <td key={d} className={`p-1 text-center border-r border-gray-100 ${
+                                                    row[String(d)] === 'H' ? 'bg-green-50 text-green-600 font-bold' :
+                                                    row[String(d)] === 'S' ? 'bg-yellow-50 text-yellow-600 font-bold' :
+                                                    row[String(d)] === 'I' ? 'bg-blue-50 text-blue-600 font-bold' :
+                                                    row[String(d)] === 'A' ? 'bg-red-50 text-red-600 font-bold' :
+                                                    'text-gray-300'
+                                                }`}>
+                                                    {row[String(d)]}
+                                                </td>
+                                            ))}
+                                            <td className="p-1 text-center font-bold text-green-700 bg-green-50/30 border-r border-gray-100">{row.H}</td>
+                                            <td className="p-1 text-center font-bold text-yellow-700 bg-yellow-50/30 border-r border-gray-100">{row.S}</td>
+                                            <td className="p-1 text-center font-bold text-blue-700 bg-blue-50/30 border-r border-gray-100">{row.I}</td>
+                                            <td className="p-1 text-center font-bold text-red-700 bg-red-50/30">{row.A}</td>
+                                        </tr>
+                                     ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </div>
+            ) : (
+                <div className="text-center py-12 text-gray-400">
+                    Pilih kelas terlebih dahulu untuk melihat preview laporan.
+                </div>
+            )}
         </div>
 
         {/* AI Report Generator */}
